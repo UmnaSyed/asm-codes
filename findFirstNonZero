@@ -1,0 +1,56 @@
+;-------------------------------------------------
+; Program: Find the first non-zero number in an array
+; Using:  Irvine32.inc (MASM32)
+;-------------------------------------------------
+INCLUDE Irvine32.inc
+
+.data
+array  DWORD  0, 0, 0, 15, 27, 0, 9     ; sample array
+count  DWORD  LENGTHOF array             ; total elements
+found  DWORD  ?                          ; will hold first non-zero value
+foundFlag DWORD 0                        ; 0 = not found, 1 = found
+
+msg1   BYTE "First non-zero number: ", 0
+msg2   BYTE "No non-zero number found.", 0
+
+.code
+main PROC
+    mov  esi, OFFSET array      ; ESI points to the first element
+    mov  ecx, count             ; ECX = number of elements
+
+scan_loop:
+    mov  eax, [esi]             ; load current element into EAX
+    test eax, eax               ; set ZF=1 if EAX == 0
+    jnz  found_nonzero          ; jump if non-zero (ZF=0)
+    add  esi, 4                 ; move to next element (DWORD = 4 bytes)
+    loop scan_loop              ; repeat until ECX = 0
+    jmp  not_found              ; none found
+
+found_nonzero:
+    mov  found, eax             ; store found number
+    mov  foundFlag, 1
+    jmp  done
+
+not_found:
+    mov  foundFlag, 0
+
+done:
+    cmp  foundFlag, 1
+    jne  show_not_found
+
+    mov  edx, OFFSET msg1
+    call WriteString
+    mov  eax, found
+    call WriteDec
+    call Crlf
+    jmp  exit_program
+
+show_not_found:
+    mov  edx, OFFSET msg2
+    call WriteString
+    call Crlf
+
+exit_program:
+    exit
+main ENDP
+END main
