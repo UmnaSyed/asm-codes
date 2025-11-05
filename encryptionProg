@@ -1,0 +1,68 @@
+;-------------------------------------------------
+; Program: XOR Text Encryption (Irvine32)
+; Author: ChatGPT
+;-------------------------------------------------
+INCLUDE Irvine32.inc
+
+.data
+msgInput    BYTE "Enter text to encrypt: ", 0
+msgKey      BYTE "Enter single-byte key (0–255): ", 0
+msgOutput   BYTE "Encrypted text: ", 0
+msgDone     BYTE "Decrypted text: ", 0
+buffer      BYTE 100 DUP(0)          ; input buffer
+key         BYTE ?                   ; encryption key
+length      DWORD ?                  ; length of input string
+
+.code
+main PROC
+    ; --- Ask user for text ---
+    mov edx, OFFSET msgInput
+    call WriteString
+    mov edx, OFFSET buffer
+    mov ecx, SIZEOF buffer
+    call ReadString
+    mov length, eax                  ; store input length
+
+    ; --- Ask user for key ---
+    mov edx, OFFSET msgKey
+    call WriteString
+    call ReadDec                     ; user enters number 0–255
+    mov key, al                      ; store in key variable
+
+    ; --- Encrypt text using XOR ---
+    mov esi, OFFSET buffer           ; ESI points to input string
+    mov ecx, length                  ; number of bytes to process
+    mov al, key                      ; AL = key byte
+
+encrypt_loop:
+    xor [esi], al                    ; XOR each byte with key
+    inc esi
+    loop encrypt_loop
+
+    ; --- Display Encrypted text ---
+    mov edx, OFFSET msgOutput
+    call WriteString
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    ; --- Decrypt again (XOR is reversible) ---
+    mov esi, OFFSET buffer
+    mov ecx, length
+    mov al, key
+
+decrypt_loop:
+    xor [esi], al                    ; XOR again with same key → original text
+    inc esi
+    loop decrypt_loop
+
+    ; --- Display Decrypted text ---
+    mov edx, OFFSET msgDone
+    call WriteString
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    exit
+main ENDP
+END main
