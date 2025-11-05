@@ -1,0 +1,52 @@
+;-------------------------------------------------
+; Program: Reverse a string using a stack
+; Author: ChatGPT
+;-------------------------------------------------
+INCLUDE Irvine32.inc
+
+.data
+prompt     BYTE "Enter a string: ", 0
+msgResult  BYTE "Reversed string: ", 0
+buffer     BYTE 100 DUP(0)       ; Input buffer
+length     DWORD ?               ; To store string length
+
+.code
+main PROC
+    ; --- Ask user for input ---
+    mov edx, OFFSET prompt
+    call WriteString
+    mov edx, OFFSET buffer
+    mov ecx, SIZEOF buffer
+    call ReadString
+    mov length, eax              ; store number of chars entered
+
+    ; --- Push each character onto the stack ---
+    mov ecx, length              ; loop counter
+    mov esi, OFFSET buffer       ; point to first char
+
+push_loop:
+    mov al, [esi]                ; get one character
+    push eax                     ; push onto stack (we use EAX for alignment)
+    inc esi                      ; move to next char
+    loop push_loop
+
+    ; --- Pop back into buffer (reversing order) ---
+    mov ecx, length              ; repeat for each character
+    mov esi, OFFSET buffer       ; point again to start of buffer
+
+pop_loop:
+    pop eax                      ; pop top character
+    mov [esi], al                ; store in buffer
+    inc esi
+    loop pop_loop
+
+    ; --- Display reversed string ---
+    mov edx, OFFSET msgResult
+    call WriteString
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    exit
+main ENDP
+END main
