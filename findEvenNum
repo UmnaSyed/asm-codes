@@ -1,0 +1,60 @@
+;-------------------------------------------------
+; Program: Find the first even number in an array
+; Using:  Irvine32.inc (MASM32)
+;-------------------------------------------------
+INCLUDE Irvine32.inc
+
+.data
+array  DWORD  5, 9, 13, 8, 11, 14      ; sample array
+count  DWORD  LENGTHOF array            ; number of elements
+found  DWORD  ?                         ; store first even number
+foundFlag DWORD 0                       ; 0 = not found yet
+
+msg1   BYTE "First even number: ", 0
+msg2   BYTE "No even number found.", 0
+
+.code
+main PROC
+    mov  esi, OFFSET array     ; point to first element
+    mov  ecx, count            ; number of elements
+
+search_loop:
+    mov  eax, [esi]            ; load current number
+    test eax, 1                ; check bit 0 (even/odd)
+    jz   found_even            ; if bit0 = 0 → even
+    add  esi, 4                ; next DWORD
+    loop search_loop
+    jmp  not_found
+
+found_even:
+    mov  found, eax
+    mov  foundFlag, 1
+    jmp  done
+
+not_found:
+    mov  foundFlag, 0
+
+done:
+    ; Display result
+    cmp  foundFlag, 1
+    jne  show_not_found
+
+    ; Print "First even number: "
+    mov  edx, OFFSET msg1
+    call WriteString
+
+    ; Print the number
+    mov  eax, found
+    call WriteDec
+    call Crlf
+    jmp  exit_program
+
+show_not_found:
+    mov  edx, OFFSET msg2
+    call WriteString
+    call Crlf
+
+exit_program:
+    exit
+main ENDP
+END main
